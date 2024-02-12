@@ -14,10 +14,9 @@ from scipy.stats import entropy
 from checkpointer import Checkpointer
 import models
 from datasets import get_corrupt_data_loader, get_data_loader
-# from trainer import ParVITrainer
 import optax
 import jax.example_libraries.optimizers as optimizers
-from pmap_optimizers import nesterov_weight_decay
+from optimizers import nesterov_weight_decay
 import tree
 
 class SetID(RunObserver):
@@ -39,14 +38,13 @@ def my_config():
     ece_bins = 15
     seed = 1  # Random seed
     name = 'name'  # Unique name for the folder of the experiment
-    model_name = 'StoResNet18'  # Choose with model to train
+    model_name = 'ResNet18'  # Choose with model to train
     batch_size = 128  # Batch size
     test_batch_size = 512
-    n_members = 2  # Number of components in the posterior
-    # Options of the deterministic weights for the SGD
-    weight_decay = 5e-4
-    init_lr = 0.1
-    # Universal options for the SGD
+    n_members = 2  # Number of members in the ensemble
+    weight_decay = 5e-4 # Weight decay
+    init_lr = 0.1 # Initial learning rate
+    # Universal options for the SGD optimizer
     sgd_params = {
         'momentum': 0.9,
         'nesterov': True
@@ -54,16 +52,9 @@ def my_config():
     num_epochs = 300  # Number of training epoch
     validation = True  # Whether of not to use a validation set
     validation_fraction = 0.1  # Size of the validation set
-    save_freq = 301  # Frequency of saving checkpoint
-    num_test_sample = 1  # Number of samples drawn from each component during testing
-    logging_freq = 1  # Logging frequency
-    device = 'cuda'
-    lr_ratio = 0.01  # For annealing the learning rate of the deterministic weights
-    # First value chooses which epoch to start decreasing the learning rate and the second value chooses which epoch to stop. See the schedule function for more information.
-    milestones = (0.5, 0.9)
+    lr_ratio = 0.01  # For annealing the learning rate
+    milestones = (0.5, 0.9) # First value chooses which epoch to start decreasing the learning rate and the second value chooses which epoch to stop.
     augment_data = True
-    # if not torch.cuda.is_available():
-    #     device = 'cpu'
     dataset = 'cifar100'  # Dataset of the experiment
     if dataset == 'cifar100' or dataset == 'vgg_cifar100':
         num_classes = 100
@@ -75,36 +66,12 @@ def my_config():
         num_classes = 200
         input_size = (64, 64, 3)
 
-    num_train_workers = 8
-    num_test_workers = 2
-    data_norm_stat = None
-    num_start_epochs = 5
-    alpha = {
-        'start': 100.0, 'end': 1.0, 'n_epochs': 80
-    }
-    repulsive_type = 'jacobian'
-    basis_coeffs_path = ""
+    num_train_workers = 8 # Number of workers for the training dataloader
+    num_test_workers = 2 # Number of workers for the testing dataloader
+    num_start_epochs = 0 # Number of epochs where the learning rate is increased from 0 to init_lr
+    data_pca_path = ""
     eps = 1e-12
-    mean_over_batch = True
-    empcov_path = ""
-    share_bias = False
-    initial_conv_config = { "kernel_shape": 3, "output_channels": 64, "stride": 1, "padding": "SAME"}
-#     if model_name.startswith('WideResNet'):
-#         first_conv_name = 'init_conv'
-#     elif model_name.startswith('ResNet') or model_name.startswith('PreActResNet'):
-    first_conv_name = 'initial_conv'
     label_smoothing = 0.0
-    log_softmax_grad = False
-
-@ex.capture
-def get_alpha(alpha, num_epochs):
-    def get_scale(epoch, start, end, n_epochs):
-        value = start + epoch * (end-start)/n_epochs
-        return value if epoch < n_epochs else end
-    values = jnp.array([
-        get_scale(i, **alpha) for i in range(num_epochs)
-    ], dtype=jnp.float32)
-    return values
 
 class LrScheduler():
     def __init__(self, init_value, num_epochs, milestones, lr_ratio, num_start_epochs):
@@ -132,18 +99,14 @@ class LrScheduler():
         return self.init_value * factor
 
 @ex.capture
-def get_model(model_name, num_classes, input_size, keys, initial_conv_config):
+def get_model(model_name, num_classes, input_size, keys):
     model_fn = getattr(models, model_name)
     def _forward(x, is_training):
-        model = model_fn(num_classes, initial_conv_config=initial_conv_config)
+        model = model_fn(num_classes)
         return model(x, is_training)
     forward = hk.transform_with_state(_forward)
     parallel_init_fn = jax.vmap(forward.init, (0, None, None), 0)
-    # parallel_apply_fn = jax.vmap(forward.apply, (0, 0, None, None, None), 0)
-
-  
     params, state = parallel_init_fn(keys, jnp.ones((1, *input_size)), True)
-
     return params, state
 
 @ex.capture
@@ -151,9 +114,6 @@ def get_optimizer(init_lr, milestones, num_epochs, lr_ratio, num_start_epochs, s
     scheduler = LrScheduler(init_lr, num_epochs, milestones, lr_ratio, num_start_epochs)
     opt_init, opt_update, get_params, get_velocity = nesterov_weight_decay(mass=sgd_params['momentum'], weight_decay=0.0)
     return opt_init, opt_update, get_params, get_velocity, scheduler
-
-def l2_loss(params):
-    return 0.5 * sum(jnp.sum(jnp.square(p)) for p in params)
 
 @ex.capture
 def get_dataloader(batch_size, test_batch_size, validation, validation_fraction, dataset, augment_data, num_train_workers, num_test_workers):
@@ -275,58 +235,49 @@ def select_first(x):
     return x[0]
 
 @ex.automain
-def main(_run, model_name, empcov_path, initial_conv_config, weight_decay, first_conv_name, num_classes, validation, num_epochs, batch_size, dataset, repulsive_type, seed, n_members, eps, input_size, basis_coeffs_path, mean_over_batch, label_smoothing, log_softmax_grad):
+def main(_run, model_name, weight_decay, num_classes, validation, num_epochs, dataset, repulsive_type, seed, n_members, eps, data_pca_path, label_smoothing):
     logger=get_logger()
     if validation:
         train_loader, valid_loader, test_loader = get_dataloader()
-        logger.info(
-            f"Train size: {len(train_loader.dataset)}, validation size: {len(valid_loader.dataset)}, test size: {len(test_loader.dataset)}")
+        logger.info(f"Train size: {len(train_loader.dataset)}, validation size: {len(valid_loader.dataset)}, test size: {len(test_loader.dataset)}")
     else:
         train_loader, test_loader= get_dataloader()
-        logger.info(
-            f"Train size: {len(train_loader.dataset)}, test size: {len(test_loader.dataset)}")
-    n_batch= len(train_loader)
-    devices = jax.local_devices()
+        logger.info(f"Train size: {len(train_loader.dataset)}, test size: {len(test_loader.dataset)}")
+    
+    n_batch   = len(train_loader)
+    devices   = jax.local_devices()
     n_devices = len(devices)
-    rng = jax.random.PRNGKey(seed)
+    
+    rng           = jax.random.PRNGKey(seed)
     key, *subkeys = jax.random.split(rng, n_members+1)
-    subkeys = jnp.vstack(subkeys)
+    subkeys       = jnp.vstack(subkeys)
     params, state = get_model(keys=subkeys)
     
     model_fn = getattr(models, model_name)
     def _forward(x, is_training):
-        model = model_fn(num_classes, bn_config={'cross_replica_axis': 'batch'}, initial_conv_config=initial_conv_config)
+        model = model_fn(num_classes, bn_config={'cross_replica_axis': 'batch'})
         return model(x, is_training)
     apply_fn = hk.transform_with_state(_forward).apply
     
     opt_init, opt_update, get_params, get_velocity, scheduler = get_optimizer()
     velocity = jax.tree_util.tree_map(opt_init, params)
     
-    params = jax.device_put_replicated(params, devices)
-    state = jax.device_put_replicated(state, devices)
+    params   = jax.device_put_replicated(params, devices)
+    state    = jax.device_put_replicated(state, devices)
     velocity = jax.device_put_replicated(velocity, devices)
-    
-    alphas = get_alpha()
-    alphas = jax.device_put_replicated(alphas, devices)
-    
-    if repulsive_type == 'jacobian':
-        matrix_basis = np.load(basis_coeffs_path)
-        loaded_basis = jnp.array(matrix_basis['basis'])
-        loaded_coeffs = jnp.array(matrix_basis['coeffs'])
+
+    if data_pca_path != "":
+        data_pca = np.load(data_pca_path)
+        eigenvectors = jnp.array(data_pca['eigenvectors'])
+        eigenvalues = jnp.array(data_pca['eigenvalues'])
     else:
-        loaded_basis = loaded_coeffs = None
+        eigenvectors = eigenvalues = None
         
     step_sizes = jax.device_put_replicated(scheduler.lrs, devices)
 
-    if empcov_path != "":
-        empcov = np.load(empcov_path)
-    else:
-        empcov = None
-
     @partial(jax.pmap, axis_name='batch')
-    def train_step(epoch, params, state, velocity, bx, by, alphas, step_size):
+    def train_step(epoch, params, state, velocity, bx, by, step_size):
         batch_size, height, width, channel = bx.shape
-        alpha = alphas[epoch]
         
         def forward(params, state, bx, by):
             logits, vjpfun, new_state = jax.vjp(lambda inputs: apply_fn(params, state, None, inputs, True), bx, has_aux=True)
@@ -337,9 +288,12 @@ def main(_run, model_name, empcov_path, initial_conv_config, weight_decay, first
         
         def get_repulsive_term(jacobian):
             # jacobian: [n_members, n_devices, batch_size, *input_shape]
-            jacobian       = jnp.reshape(jacobian, (n_members, n_devices * batch_size, height*width*channel)) @ loaded_basis
+            jacobian       = jnp.reshape(jacobian, (n_members, n_devices * batch_size, height*width*channel))
+            if eigenvectors is not None:
+                jacobian   = jacobian @ eigenvectors
             jacobian       = jacobian / jnp.sqrt(jnp.sum(jnp.square(jacobian), axis=2, keepdims=True) + eps)
-            jacobian       = jacobian * loaded_coeffs
+            if eigenvalues is not None:
+                jacobian   = jacobian * eigenvalues
             sqdist         = jax.vmap(jax.vmap(lambda x, y: jnp.sum(jnp.square(x-y), axis=1), (0, None), 0), (1, 1), 2)(jacobian, jax.lax.stop_gradient(jacobian))
             median         = jnp.median(jax.lax.stop_gradient(sqdist), 0)
             bandwidth      = median / jnp.log(jacobian.shape[0]) + 1e-12
@@ -357,19 +311,17 @@ def main(_run, model_name, empcov_path, initial_conv_config, weight_decay, first
             jacobian = jax.lax.all_gather(jacobian, axis_name='batch', axis=1, tiled=False) # [n_members, n_devices, batch_size, *input_shape]
             (repulsion_term, median), jacobian_grad = jax.value_and_grad(get_repulsive_term, has_aux=True)(jacobian)
             jacobian_grad = jacobian_grad[:, jax.lax.axis_index('batch')]
-            params_grad = vjpfun((logits_grad, alpha*jacobian_grad))[0]
-            return params_grad, cross_ent_loss/n_members, repulsion_term/n_members/n_devices, alpha, median, new_state
+            params_grad = vjpfun((logits_grad, jacobian_grad))[0]
+            return params_grad, cross_ent_loss/n_members, repulsion_term/n_members/n_devices, median, new_state
         
-        grads, cross_ent_loss, repulsion_term, repulsion_weight, median, new_state = calculate_gradients(params, state)
+        grads, cross_ent_loss, repulsion_term, median, new_state = calculate_gradients(params, state)
         grads         = jax.lax.pmean(grads, axis_name='batch')
         grads         = jax.tree_util.tree_map(lambda g, p: g + weight_decay * p, grads, params)
         new_opt_state = jax.tree_util.tree_map(lambda g, p, v: opt_update(step_size[epoch], g, p, v), grads, params, velocity)
         new_params    = jax.tree_util.tree_map(get_params, new_opt_state, is_leaf=lambda o: isinstance(o, tuple) and len(o)==2)
         new_velocity  = jax.tree_util.tree_map(get_velocity, new_opt_state, is_leaf=lambda o: isinstance(o, tuple) and len(o)==2)
-        return new_state, new_params, new_velocity, jax.lax.pmean(cross_ent_loss, axis_name='batch'), jax.lax.pmean(repulsion_term, axis_name='batch'), jax.lax.pmean(repulsion_weight, axis_name='batch'), jax.lax.pmean(median, axis_name='batch')
+        return new_state, new_params, new_velocity, cross_ent_loss, repulsion_term, median
 
-    # trainer = ParVITrainer(model, optimizer, n_members, torch.nn.functional.nll_loss)
-#     os.makedirs(os.path.join(BASE_DIR, _run._id, 'mask'), exist_ok=True)
     for i in range(num_epochs):
         total_loss = 0
         n_count = 0
@@ -379,17 +331,16 @@ def main(_run, model_name, empcov_path, initial_conv_config, weight_decay, first
             bx = jax.device_put_sharded(jnp.split(bx, n_devices, axis=0), devices)
             by = jax.device_put_sharded(jnp.split(by, n_devices, axis=0), devices)
             epochs = jax.device_put_replicated(jnp.array(i), devices)
-            state, params, velocity, nll_loss, repulsion_term, alpha, median = train_step(epochs, params, state, velocity, bx, by, alphas, step_sizes)
+            state, params, velocity, nll_loss, repulsion_term, median = train_step(epochs, params, state, velocity, bx, by, step_sizes)
             nll_loss = jnp.mean(nll_loss)
             repulsion_term = jnp.mean(repulsion_term)
-            alpha = jnp.mean(alpha)
             median = jnp.mean(median)
             total_loss += nll_loss
             n_count += 1
-            logger.info(f"Epoch {i}: neg_log_like {nll_loss:.4f}, repulsion term {repulsion_term:.1e}, median {median:.4f}, alpha {alpha:.1f}, lr {scheduler(i).item():.4f}")
+            logger.info(f"Epoch {i}: neg_log_like {nll_loss:.4f}, repulsion term {repulsion_term:.1e}, median {median:.4f}, lr {scheduler(i).item():.4f}")
         ex.log_scalar("nll.train", total_loss / n_count, i)
     checkpointer = Checkpointer(os.path.join(BASE_DIR, _run._id, f'checkpoint.pkl'))
-    checkpointer.save({'params': jax.tree_util.tree_map(select_first, params), 'state': jax.tree_util.tree_map(select_first, state)}) #, 'basis': loaded_basis, 'matrix': loaded_matrix})
+    checkpointer.save({'params': jax.tree_util.tree_map(select_first, params), 'state': jax.tree_util.tree_map(select_first, state)}) #, 'basis': eigenvectors, 'matrix': loaded_matrix})
     logger.info('Save checkpoint')
     param_state = checkpointer.load()
     params = param_state['params']

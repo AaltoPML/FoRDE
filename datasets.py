@@ -8,7 +8,6 @@ from PIL import Image
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Subset, distributed
 from tinyimagenet import TrainTinyImageNetDataset, TestTinyImageNetDataset, CorruptTinyImageNetDataset
-# import imagecorruptions
 
 VALID_SPLIT_SEED=88
 NORM_STAT = {
@@ -23,7 +22,7 @@ NUM_CLASSES = {
     'cifar10': 10, 'cifar100': 100, 'tinyimagenet': 200
 }
 def get_data_loader(dataset, norm_stat=None, train_bs=64, test_bs=64, validation=False, validation_fraction=0.1, root_dir='data/', test_only=False, train_only=False, augment=True,
-                    num_train_workers=2, num_test_workers=2, shuffle_train=True, drop_last_train=True, corruption=None):
+                    num_train_workers=2, num_test_workers=2, shuffle_train=True, drop_last_train=True):
     if dataset in ('cifar10', 'cifar100', 'svhn'):
         data_cls = getattr(torchvision.datasets, dataset.upper())
     if dataset in ('vgg_cifar10', 'vgg_cifar100'):
@@ -45,20 +44,12 @@ def get_data_loader(dataset, norm_stat=None, train_bs=64, test_bs=64, validation
             torchvision.transforms.RandomCrop(64, padding=4),
             torchvision.transforms.RandomHorizontalFlip()
         ] if augment else []
-    if corruption is None:
-        corruption_transform = []
-    else:
-        corruption_name, severity = corruption
-        corruption_transform = [
-            lambda img: Image.fromarray(imagecorruptions.corrupt(np.asarray(img), severity, corruption_name))
-        ]
     transform = torchvision.transforms.Compose([
         *([torchvision.transforms.ToTensor()] if dataset in ('cifar10', 'cifar100', 'svhn', 'vgg_cifar10', 'vgg_cifar100') else []),
         torchvision.transforms.Normalize(*(NORM_STAT[dataset] if norm_stat is None else norm_stat))
     ])
     train_data = train_data_cls(
         transform=torchvision.transforms.Compose([
-            *corruption_transform,
             *augment_transform,
             transform
         ]))
@@ -104,25 +95,7 @@ class CorruptDataset(torch.utils.data.Dataset):
             sample = self.transform(sample)
 
         return sample, label
-
-class CIFAR10_1(torch.utils.data.Dataset):
-    def __init__(self, root, transform=None):
-        self.data = np.load(os.path.join(root, 'data.npy'))
-        self.label = np.load(os.path.join(root, 'labels.npy'))
-        self.transform = transform
-    
-    def __len__(self):
-        return len(self.data)
-    
-    def __getitem__(self, idx):
-        sample, label = self.data[idx], int(self.label[idx])
-        sample = Image.fromarray(sample)
-
-        if self.transform:
-            sample = self.transform(sample)
-
-        return sample, label
-    
+ 
 def get_corrupt_data_loader(dataset, intensity, batch_size=64, root_dir='data/', num_workers=4, norm_stat=None):
     corrupt_type = ['saturate',
                     'shot_noise',
@@ -160,66 +133,3 @@ def get_corrupt_data_loader(dataset, intensity, batch_size=64, root_dir='data/',
         test_data = CorruptTinyImageNetDataset(intensity+1, transform)
         test_loader = DataLoader(test_data, batch_size=batch_size, pin_memory=True, shuffle=False, num_workers=num_workers)
         return test_loader
-
-class LabelCorruptDataset(torch.utils.data.Dataset):
-    def __init__(self, root, transform=None):
-        data = torch.load(root)
-        self.images = data['data']
-        self.labels = data['labels']
-        self.transform = transform
-
-    def __len__(self):
-        return len(self.labels)
-
-    def __getitem__(self, idx):
-        sample, label = self.images[idx].float() / 255.0, self.labels[idx]
-
-        if self.transform:
-            sample = self.transform(sample)
-
-        return sample, label
-
-def get_label_corrupt_data_loader(dataset, noise, norm_stat=None, train_bs=64, test_bs=64, validation=False, validation_fraction=0.1, root_dir='data/', test_only=False, train_only=False, augment=True,
-                    num_train_workers=2, num_test_workers=2, shuffle_train=True, clean_noisy_split=False, drop_last_train=True):
-    if dataset == 'cifar10':
-        folder_name = "CIFAR-10-LABELNOISE"
-    elif dataset == 'cifar100':
-        folder_name = "CIFAR-100-LABELNOISE"
-    train_data_cls = partial(LabelCorruptDataset, root=os.path.join(root_dir, folder_name, str(noise), 'data.pt'))
-    test_data_cls = partial(LabelCorruptDataset, root=os.path.join(root_dir, folder_name, 'val', 'data.pt'))
-    augment_transform = [
-        torchvision.transforms.RandomCrop(32, padding=4),
-        torchvision.transforms.RandomHorizontalFlip()
-    ] if augment else []
-    transform = torchvision.transforms.Compose([
-        torchvision.transforms.Normalize(*(NORM_STAT[dataset] if norm_stat is None else norm_stat))
-    ])
-    train_data = train_data_cls(
-        transform=torchvision.transforms.Compose([
-            *augment_transform,
-            transform
-        ]))
-    if train_only:
-        train_loader = DataLoader(train_data, batch_size=train_bs, pin_memory=True, shuffle=shuffle_train, drop_last=False, num_workers=num_train_workers)
-        return train_loader
-    test_data = test_data_cls(transform=transform)
-    test_loader = DataLoader(test_data, batch_size=test_bs, pin_memory=True, shuffle=False, num_workers=num_test_workers)
-    if test_only:
-        return test_loader
-    if validation:
-        valid_data = train_data_cls(transform=transform)
-        train_idx, valid_idx = train_test_split(np.arange(len(train_data.targets)),
-                                                test_size=validation_fraction,
-                                                shuffle=True, random_state=VALID_SPLIT_SEED,
-                                                stratify=train_data.targets)
-        train_loader = DataLoader(Subset(train_data, train_idx), batch_size=train_bs, pin_memory=True, shuffle=shuffle_train, drop_last=drop_last_train, num_workers=num_train_workers)
-        valid_loader = DataLoader(Subset(valid_data, valid_idx), batch_size=test_bs, pin_memory=True, shuffle=False, drop_last=False, num_workers=num_test_workers)
-        return train_loader, valid_loader, test_loader
-    elif clean_noisy_split:
-        indices = torch.load(os.path.join(root_dir, folder_name, str(noise), 'indices.pt'))
-        clean_loader = DataLoader(Subset(train_data, indices['true']), batch_size=train_bs, pin_memory=True, shuffle=shuffle_train, drop_last=drop_last_train, num_workers=num_train_workers)
-        noisy_loader = DataLoader(Subset(train_data, indices['false']), batch_size=train_bs, pin_memory=True, shuffle=shuffle_train, drop_last=drop_last_train, num_workers=num_train_workers)
-        return clean_loader, noisy_loader, test_loader
-    else:
-        train_loader = DataLoader(train_data, batch_size=train_bs, pin_memory=True, shuffle=shuffle_train, drop_last=drop_last_train, num_workers=num_train_workers)
-        return train_loader, test_loader
