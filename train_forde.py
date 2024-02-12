@@ -1,8 +1,6 @@
 import json
 import logging
 import os
-from bisect import bisect
-from itertools import chain
 from functools import partial
 import haiku as hk
 import jax
@@ -10,14 +8,11 @@ import jax.numpy as jnp
 import numpy as np
 from sacred import Experiment
 from sacred.observers import FileStorageObserver, RunObserver
-from scipy.stats import entropy
 from checkpointer import Checkpointer
 import models
 from datasets import get_corrupt_data_loader, get_data_loader
 import optax
-import jax.example_libraries.optimizers as optimizers
 from optimizers import nesterov_weight_decay
-import tree
 
 class SetID(RunObserver):
     priority = 50  # very high priority
