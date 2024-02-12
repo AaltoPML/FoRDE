@@ -267,9 +267,9 @@ def main(_run, model_name, weight_decay, num_classes, validation, num_epochs, da
     velocity = jax.device_put_replicated(velocity, devices)
 
     if data_pca_path != "":
-        data_pca = np.load(data_pca_path)
+        data_pca     = np.load(data_pca_path)
         eigenvectors = jnp.array(data_pca['eigenvectors'])
-        eigenvalues = jnp.array(data_pca['eigenvalues'])
+        eigenvalues  = jnp.array(data_pca['eigenvalues'])
     else:
         eigenvectors = eigenvalues = None
         
@@ -311,7 +311,7 @@ def main(_run, model_name, weight_decay, num_classes, validation, num_epochs, da
             jacobian = jax.lax.all_gather(jacobian, axis_name='batch', axis=1, tiled=False) # [n_members, n_devices, batch_size, *input_shape]
             (repulsion_term, median), jacobian_grad = jax.value_and_grad(get_repulsive_term, has_aux=True)(jacobian)
             jacobian_grad = jacobian_grad[:, jax.lax.axis_index('batch')]
-            params_grad = vjpfun((logits_grad, jacobian_grad))[0]
+            params_grad   = vjpfun((logits_grad, jacobian_grad))[0]
             return params_grad, cross_ent_loss/n_members, repulsion_term/n_members/n_devices, median, new_state
         
         grads, cross_ent_loss, repulsion_term, median, new_state = calculate_gradients(params, state)
@@ -344,7 +344,7 @@ def main(_run, model_name, weight_decay, num_classes, validation, num_epochs, da
     logger.info('Save checkpoint')
     param_state = checkpointer.load()
     params = param_state['params']
-    state = param_state['state']
+    state  = param_state['state']
     parallel_apply_fn = jax.vmap(apply_fn, (0, 0, None, None, None), 0)
     test_result = test_ensemble(parallel_apply_fn, params, state, test_loader)
     os.makedirs(os.path.join(BASE_DIR, _run._id, dataset), exist_ok=True)
