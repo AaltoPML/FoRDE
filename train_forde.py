@@ -335,7 +335,7 @@ def main(_run, model_name, weight_decay, num_classes, validation, num_epochs, da
             logger.info(f"Epoch {i}: neg_log_like {nll_loss:.4f}, repulsion term {repulsion_term:.1e}, median {median:.4f}, lr {scheduler(i).item():.4f}")
         ex.log_scalar("nll.train", total_loss / n_count, i)
     checkpointer = Checkpointer(os.path.join(BASE_DIR, _run._id, f'checkpoint.pkl'))
-    checkpointer.save({'params': jax.tree_util.tree_map(select_first, params), 'state': jax.tree_util.tree_map(select_first, state)}) #, 'basis': eigenvectors, 'matrix': loaded_matrix})
+    checkpointer.save({'params': jax.tree_util.tree_map(select_first, params), 'state': jax.tree_util.tree_map(select_first, state)})
     logger.info('Save checkpoint')
     param_state = checkpointer.load()
     params = param_state['params']
