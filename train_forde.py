@@ -51,10 +51,10 @@ def my_config():
     milestones = (0.5, 0.9) # First value chooses which epoch to start decreasing the learning rate and the second value chooses which epoch to stop.
     augment_data = True
     dataset = 'cifar100'  # Dataset of the experiment
-    if dataset == 'cifar100' or dataset == 'vgg_cifar100':
+    if dataset == 'cifar100':
         num_classes = 100
         input_size = (32, 32, 3)
-    elif dataset == 'cifar10' or dataset == 'vgg_cifar10' or dataset == 'fmnist':
+    elif dataset == 'cifar10':
         num_classes = 10
         input_size = (32, 32, 3)
     elif dataset == 'tinyimagenet':
