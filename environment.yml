@@ -1,4 +1,4 @@
-name: jax_huggingface
+name: jax_flax
 channels:
   - nvidia
   - pytorch
@@ -169,7 +169,6 @@ dependencies:
       - astunparse==1.6.3
       - cachetools==5.3.1
       - chex==0.1.82
-      - dm-haiku==0.0.11.dev0
       - dm-tree==0.1.8
       - docopt==0.6.2
       - etils==1.4.1
@@ -220,4 +219,4 @@ dependencies:
       - urllib3==1.26.16
       - werkzeug==2.3.7
       - wrapt==1.15.0
-prefix: /home/trungt1/mambaforge/envs/jax_huggingface
+prefix: jax_flax
