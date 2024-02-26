@@ -64,9 +64,9 @@ def my_config():
     num_train_workers = 8 # Number of workers for the training dataloader
     num_test_workers = 2 # Number of workers for the testing dataloader
     num_start_epochs = 0 # Number of epochs where the learning rate is increased from 0 to init_lr
-    data_pca_path = ""
+    data_pca_path = "" # Path to the pre-computed PCA of the training data
     eps = 1e-12
-    label_smoothing = 0.0
+    label_smoothing = 0.0 # Label smoothing
 
 class LrScheduler():
     def __init__(self, init_value, num_epochs, milestones, lr_ratio, num_start_epochs):
