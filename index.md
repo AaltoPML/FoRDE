@@ -1,6 +1,6 @@
 ---
 title: Input-gradient space particle inference for neural network ensembles
-publication: Spotlight (top 5% papers) at the Twelfth International Conference on Learning Representations (ICRL) 2024
+publication: Spotlight (top 5% papers) at the Twelfth International Conference on Learning Representations (ICLR) 2024
 description: Trung Trinh, Markus Heinonen, Luigi Acerbi, Samuel Kaski
 ---
 
