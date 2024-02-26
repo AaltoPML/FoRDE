@@ -25,7 +25,7 @@ if __name__ == '__main__':
             )
         data = np.stack(data, axis=0)
     
-    data = (data.data-NORM_STAT[args.dataset][0])/NORM_STAT[args.dataset][1]
+    data = (data-NORM_STAT[args.dataset][0])/NORM_STAT[args.dataset][1]
     data = np.reshape(data, (data.shape[0], -1))
     empcov = (data.T @ data)/(data.shape[0]-1)
     U, S, Vh = np.linalg.svd(empcov)
