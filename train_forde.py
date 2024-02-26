@@ -2,7 +2,7 @@ import json
 import logging
 import os
 from functools import partial
-import haiku as hk
+import flax
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -95,13 +95,11 @@ class LrScheduler():
 
 @ex.capture
 def get_model(model_name, num_classes, input_size, keys):
-    model_fn = getattr(models, model_name)
-    def _forward(x, is_training):
-        model = model_fn(num_classes)
-        return model(x, is_training)
-    forward = hk.transform_with_state(_forward)
-    parallel_init_fn = jax.vmap(forward.init, (0, None, None), 0)
-    params, state = parallel_init_fn(keys, jnp.ones((1, *input_size)), True)
+    model = getattr(models, model_name)(num_classes, bn_axis_name=None)
+    parallel_init_fn = jax.vmap(model.init, (0, None, None), 0)
+    variables = parallel_init_fn(keys, jnp.ones((1, *input_size)), True)
+    state, params = flax.core.pop(variables, 'params')
+    del variables
     return params, state
 
 @ex.capture
@@ -164,7 +162,7 @@ def test_ensemble(model_fn, params, state, dataloader, ece_bins, n_members):
     n_devices = len(devices)
     @partial(jax.pmap, axis_name='batch')
     def eval_batch(bx, by):
-        logits, _ = model_fn(params, state, None, bx, False)
+        logits, _ = model_fn({'params': params, **state}, bx)
         bnll = -optax.softmax_cross_entropy_with_integer_labels(
             logits, by[None, :]
         )
@@ -248,11 +246,7 @@ def main(_run, model_name, weight_decay, num_classes, validation, num_epochs, da
     subkeys       = jnp.vstack(subkeys)
     params, state = get_model(keys=subkeys)
     
-    model_fn = getattr(models, model_name)
-    def _forward(x, is_training):
-        model = model_fn(num_classes, bn_config={'cross_replica_axis': 'batch'})
-        return model(x, is_training)
-    apply_fn = hk.transform_with_state(_forward).apply
+    apply_fn = partial(getattr(models, model_name)(num_classes, bn_axis_name='batch'), mutable=list(state.keys()))
     
     opt_init, opt_update, get_params, get_velocity, scheduler = get_optimizer()
     velocity = jax.tree_util.tree_map(opt_init, params)
@@ -275,7 +269,7 @@ def main(_run, model_name, weight_decay, num_classes, validation, num_epochs, da
         batch_size, height, width, channel = bx.shape
         
         def forward(params, state, bx, by):
-            logits, vjpfun, new_state = jax.vjp(lambda inputs: apply_fn(params, state, None, inputs, True), bx, has_aux=True)
+            logits, vjpfun, new_state = jax.vjp(lambda inputs: apply_fn({'params': params, **state}, inputs, True), bx, has_aux=True)
             labels = jax.nn.one_hot(by, num_classes=logits.shape[-1], dtype=jnp.float32)
             logits_grad = jax.grad(lambda logits: jnp.sum(logits * labels))(logits)
             jacobian = vjpfun(logits_grad)[0]
@@ -340,7 +334,7 @@ def main(_run, model_name, weight_decay, num_classes, validation, num_epochs, da
     param_state = checkpointer.load()
     params = param_state['params']
     state  = param_state['state']
-    parallel_apply_fn = jax.vmap(apply_fn, (0, 0, None, None, None), 0)
+    parallel_apply_fn = jax.vmap(partial(apply_fn, train=False), (0, None), 0)
     test_result = test_ensemble(parallel_apply_fn, params, state, test_loader)
     os.makedirs(os.path.join(BASE_DIR, _run._id, dataset), exist_ok=True)
     with open(os.path.join(BASE_DIR, _run._id, dataset, 'test_result.json'), 'w') as out:
