@@ -228,7 +228,7 @@ def select_first(x):
     return x[0]
 
 @ex.automain
-def main(_run, model_name, weight_decay, num_classes, validation, num_epochs, dataset, repulsive_type, seed, n_members, eps, data_pca_path, label_smoothing):
+def main(_run, model_name, weight_decay, num_classes, validation, num_epochs, dataset, seed, n_members, eps, data_pca_path, label_smoothing):
     logger=get_logger()
     if validation:
         train_loader, valid_loader, test_loader = get_dataloader()
