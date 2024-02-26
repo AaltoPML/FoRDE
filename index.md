@@ -6,7 +6,7 @@ description: Trung Trinh, Markus Heinonen, Luigi Acerbi, Samuel Kaski
 
 *This website contains information regarding the paper Input-gradient space particle inference for neural network ensembles.*
 
-> **TL;DR**: 
+> **TL;DR**: We learn an ensemble of neural networks that is diverse with respect to their input gradients.
 
 Please cite our work if you find it useful:
 ```bibtex
