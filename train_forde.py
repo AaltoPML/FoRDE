@@ -95,7 +95,7 @@ class LrScheduler():
 
 @ex.capture
 def get_model(model_name, num_classes, input_size, keys):
-    model = getattr(models, model_name)(num_classes, bn_axis_name=None)
+    model = getattr(models, model_name)(num_classes=num_classes, bn_axis_name=None)
     parallel_init_fn = jax.vmap(model.init, (0, None, None), 0)
     variables = parallel_init_fn(keys, jnp.ones((1, *input_size)), True)
     state, params = flax.core.pop(variables, 'params')
@@ -246,7 +246,7 @@ def main(_run, model_name, weight_decay, num_classes, validation, num_epochs, da
     subkeys       = jnp.vstack(subkeys)
     params, state = get_model(keys=subkeys)
     
-    apply_fn = partial(getattr(models, model_name)(num_classes, bn_axis_name='batch'), mutable=list(state.keys()))
+    apply_fn = partial(getattr(models, model_name)(num_classes=num_classes, bn_axis_name='batch').apply, mutable=list(state.keys()))
     
     opt_init, opt_update, get_params, get_velocity, scheduler = get_optimizer()
     velocity = jax.tree_util.tree_map(opt_init, params)
