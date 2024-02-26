@@ -1,4 +1,4 @@
-Using mamba https://mamba.readthedocs.io/en/latest/ to manage the packages. The following commands must be run on a machine with Nvidia GPUs.
+Using Mamba https://mamba.readthedocs.io/en/latest/ to manage the packages. After installing Mamba, run the following commands on a machine with Nvidia GPUs to install the python packages.
 
 mamba create -n jax_flax python==3.11
 mamba activate jax_flax
