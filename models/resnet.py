@@ -58,17 +58,16 @@ class ResNetBlockV2(nn.Module):
     def __call__(self, x):
         x = self.norm()(x)
         x = self.act(x)
-        if residual.shape != x.shape:
-            if self.projection:
-                residual = self.conv(
-                    self.filters, (1, 1), self.strides, name="conv_proj"
-                )(x)
-            else:
-                residual = jnp.pad(
-                    x[:, :: self.strides[0], :: self.strides[1], :],
-                    ((0, 0), (0, 0), (0, 0), (self.filters // 4, self.filters // 4)),
-                    "constant",
-                )
+        if self.projection:
+            residual = self.conv(
+                self.filters, (1, 1), self.strides, name="conv_proj"
+            )(x)
+        else:
+            residual = jnp.pad(
+                x[:, :: self.strides[0], :: self.strides[1], :],
+                ((0, 0), (0, 0), (0, 0), (self.filters // 4, self.filters // 4)),
+                "constant",
+            )
         x = self.conv(self.filters, (3, 3), self.strides)(x)        
         x = self.norm()(x)
         x = self.act(x)
