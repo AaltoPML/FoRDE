@@ -146,7 +146,7 @@ class ResNet(nn.Module):
         )(x)
         if not self.resnet_v2:
           x = norm(name="bn_init")(x)
-          x = nn.relu(x)
+          x = self.act(x)
         if not self.low_res:
             x = nn.max_pool(x, (3, 3), strides=(2, 2), padding="SAME")
         for i, block_size in enumerate(self.stage_sizes):
@@ -162,7 +162,7 @@ class ResNet(nn.Module):
                 )(x)
         if self.resnet_v2:
             x = norm(name='bn_final')(x)
-            x = nn.relu(x)
+            x = self.act(x)
         x = jnp.mean(x, axis=(1, 2), dtype=self.dtype)
         return x
 
