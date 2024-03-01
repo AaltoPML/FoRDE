@@ -278,7 +278,7 @@ def main(_run, model_name, weight_decay, num_classes, validation, num_epochs, da
         def forward(params, state, bx, by):
             logits, vjpfun, new_state = jax.vjp(lambda inputs: apply_fn(params, state, None, inputs, True), bx, has_aux=True)
             labels = jax.nn.one_hot(by, num_classes=logits.shape[-1], dtype=jnp.float32)
-            logits_grad = jax.grad(lambda logits: jnp.sum(logits * labels))(logits)
+            logits_grad = jax.grad(lambda logits: jnp.sum(jax.nn.log_softmax(logits, axis=-1) * labels))(logits)
             jacobian = vjpfun(logits_grad)[0]
             return (logits, jacobian), new_state
         
