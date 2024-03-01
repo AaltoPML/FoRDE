@@ -1,6 +1,6 @@
 # Input-gradient space particle inference for neural network ensembles
 
-This repository contains a Jax/Flax implementation of the paper
+This repository contains a Jax/Haiku implementation of the paper
 
 [Input-gradient space particle inference for neural network ensembles](https://openreview.net/forum?id=nLWiR5P3wr)
 
