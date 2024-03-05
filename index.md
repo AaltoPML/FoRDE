@@ -34,6 +34,20 @@ Comparing neural networks via a function kernel is also challenging since functi
 over training data leads to underfitting, likely because these inputs have known labels, leaving no room for diverse predictions without impairing performance.
 Neither weight nor function space repulsion has led to significant improvements over vanilla DEs.
 
-# First-order Repulsive deep ensembles
+# FoRDEs: First-order Repulsive deep ensembles 
+
+From a functional perspective, a model can also be uniquely represented, up to translation, using
+its first-order derivatives, i.e., input gradients $\nabla_{\mathbf{x}} f$ . Promoting diversity in this third view of input gradients has notable advantages:
+
+<ol>
+  <li>each ensemble member is guaranteed to correspond to a different function;</li>
+  <li>input gradients have smaller dimensions than weights and thus are more amenable to kernel
+comparisons;</li>
+  <li>unlike function-space repulsion, input-gradient repulsion does not lead to training point
+underfitting</li>
+  <li>each ensemble member is encouraged to learn different features, which can improve robustness.</li>
+</ol> 
+
+Thus, we propose First-order Repulsive deep ensembles (FoRDEs), which are ParVI neural network ensembles that promote diversity in their input gradients.
 
 ## Wasserstein gradient descent (WGD)
