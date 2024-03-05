@@ -50,7 +50,7 @@ underfitting</li>
 
 Thus, we propose First-order Repulsive deep ensembles (FoRDEs), which are ParVI neural network ensembles that promote diversity in their input gradients. In the following sections, we present the training algorithm, the formulation of the kernel for the repulsion term as well as how to select the hyperparameters.
 
-Below, we assume a set of \\(M\\) weight particles \\(\\{\theta\_i\\}\_{i=1}^M\\) corresponding to a set of \\(M\\) neural networks \\(\\{f\_i: \mathbf{x} \mapsto f(\mathbf{x}; \theta\_i)\}\_{i=1}^M\\).
+Below, we assume a set of \\(M\\) weight particles \\(\\{\theta\_i\\}\_{i=1}^M\\) corresponding to a set of \\(M\\) neural networks \\(\\{f\_i: \mathbf{x} \mapsto f(\mathbf{x}; \theta\_i)\\}\_{i=1}^M\\).
 We focus on the supervised classification setting: given a labelled dataset \\(\mathcal{D}=\\{(\mathbf{x}\_n, y\_n)\\}\_{n=1}^N\\) with \\(\mathcal{C}\\) classes and inputs \\(\mathbf{x}\_n \in \mathbb{R}^D\\), we approximate the posterior \\(p(\theta \| \mathcal{D})\\) using the \\(M\\) particles. The output \\(f(\mathbf{x}; \theta)\\) for input \\(\mathbf{x}\\) is a vector of size \\(\mathcal{C}\\) whose \\(y\\)-th entry \\(f(\mathbf{x}; \theta)\_y\\) is the logit of the \\(y\\)-th class.
 
 ## Training algorithm: Wasserstein gradient descent (WGD)
