@@ -54,7 +54,7 @@ Below, we assume a set of \\(M\\) weight particles \\(\\{\theta\_i\\}\_{i=1}^M\\
 We focus on the supervised classification setting: given a labelled dataset \\(\mathcal{D}=\\{(\mathbf{x}\_n, y\_n)\\}\_{n=1}^N\\) with \\(\mathcal{C}\\) classes and inputs \\(\mathbf{x}\_n \in \mathbb{R}^D\\), we approximate the posterior \\(p(\theta \| \mathcal{D})\\) using the \\(M\\) particles. The output \\(f(\mathbf{x}; \theta)\\) for input \\(\mathbf{x}\\) is a vector of size \\(\mathcal{C}\\) whose \\(y\\)-th entry \\(f(\mathbf{x}; \theta)\_y\\) is the logit of the \\(y\\)-th class.
 
 ## Training algorithm: Wasserstein gradient descent (WGD)
-We use a ParVI method called Wasserstein gradient descent (WGD), which updates the weight particles \\(\{\theta\_i\}\_{i=1}^M\\) using the following rule:
+We use a ParVI method called Wasserstein gradient descent (WGD), which updates the weight particles \\(\\{\theta\_i\\}\_{i=1}^M\\) using the following rule:
 
 $$\theta^{(t+1)} = \theta^{(t)} + \eta_t \Bigg(\underbrace{\nabla_{\theta^{(t)}} \log p\big(\theta^{(t)}|\mathcal{D}\big)}_{\text{driving force}} - \underbrace{\frac{\sum_{i=1}^M \nabla_{\theta^{(t)}} k\big(\theta^{(t)},\theta_i^{(t)}\big)}{\sum_{i=1}^M k\big(\theta^{(t)},\theta_i^{(t)}\big)}}_{\text{repulsion force}} \Bigg)$$
 
