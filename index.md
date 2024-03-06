@@ -30,8 +30,9 @@ To explicitly promote diversity in a neural network ensemble, **particle-based v
 Notably, the ParVI update rule includes a kernelized repulsion term \\(k(f, f^\prime)\\) between ensemble members \\(f, f^\prime\\) to control the diversity.
 Current approaches compare networks in weight space or function space.
 Weight-space repulsion is ineffective due to the extremely high dimensionality and symmetries of the weight posterior.
-Comparing neural networks via a function kernel is also challenging since functions are infinite-dimensional objects. Previous works resort to comparing functions only on a subset of the input space. Comparing functions
-over training data leads to underfitting, likely because these inputs have known labels, leaving no room for diverse predictions without impairing performance.
+Comparing neural networks via a function kernel is also challenging since functions are infinite-dimensional objects.
+Previous works resort to comparing functions on a finite measurement set which is a subset of the input space, and thus performance of the resulting ensemble depends on the choice of the measurement set.
+Using the training data as the measurement set leads to underfitting, likely because these inputs have known labels, leaving no room for diverse predictions without impairing performance.
 Neither weight nor function space repulsion has led to significant improvements over vanilla DEs.
 
 # FoRDEs: First-order Repulsive deep ensembles 
