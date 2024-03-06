@@ -76,10 +76,10 @@ This approach also reduces computational complexity, since automatic differentia
 ### Choosing the base kernel
 We choose the RBF kernel on the unit sphere as our base kernel \\(\kappa\\):
 
-\begin{align}
+\begin{equation}
     \kappa(\mathbf{s},\mathbf{s}'; \boldsymbol{\Sigma}) = \exp\left( -\frac{1}{2} (\mathbf{s}-\mathbf{s}')^\top \boldsymbol{\Sigma}^{-1} (\mathbf{s}-\mathbf{s}')\right), \qquad \mathbf{s} = \frac{\nabla_\mathbf{x} f(\mathbf{x}; \theta)_{y}}{||\nabla_\mathbf{x} f(\mathbf{x}; \theta)_{y}||_2} \in \mathbb{R}^D
-\end{align}
+\end{equation}
 
 where \\(\boldsymbol{\Sigma} \in \mathbb{R}^{D \times D}\\) is a diagonal matrix containing squared lengthscales.
 By repulsing the normed input gradients, we expect the ensemble members to learn complementary explanatory patterns from the training data, which could improve robustness.
-Furthermore, we can control the variances of the gradients along input dimensions via the squared lengthscales \\(\boldsymbol{\Sigma}\\)
+Furthermore, we can control the variances of the gradients along input dimensions via the squared lengthscales \\(\boldsymbol{\Sigma}\\).
