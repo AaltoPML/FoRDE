@@ -68,3 +68,20 @@ Each <span class="my_blue">lengthscale</span> is inversely proportional to the s
 <img src="./assets/pca_kernel.svg" alt="drawing" width="80%" max-width="800px">
     - \\( {\color{red}\mathbf{U}} = \begin{bmatrix} {\color{red}\mathbf{u}\_1} & {\color{red}\mathbf{u}\_2} & \cdots & {\color{red}\mathbf{u}\_D} \end{bmatrix} \\) is a matrix containing the <span class="my_red">eigenvectors</span> as columns.
     - \\( {\color[RGB]{68,114,196}\boldsymbol{\Sigma}^{-1}\_{\alpha}} = (1-\alpha)\mathbf{I} + \alpha {\color[RGB]{68,114,196}\boldsymbol{\Lambda} } \\) where \\( \color[RGB]{68,114,196}\boldsymbol{\Lambda} \\) is a diagonal matrix containing the <span class="my_blue">eigenvalues</span>.
+
+# Illustrative experiments
+
+<img src="./assets/1d_regression.svg" alt="drawing" width="100%" max-width="1000px">
+
+<img src="./assets/2d_classification.svg" alt="drawing" width="100%" max-width="1000px">
+
+For a 1D regression task (above) and a 2D classification task (below), FoRDEs capture higher uncertainty than baselines in all regions outside of the training data. For the 2D classification task, we visualize the entropy of the predictive posteriors.
+
+# Lengthscale tuning experiments
+
+<img src="./assets/lengthscale_tuning.svg" alt="drawing" width="100%" max-width="1000px">
+
+- <span class="my_blue">Blue lines</span> show accuracies of FoRDEs, while <span class="my_orange">dotted orange lines</span> show accuracies of Deep ensembles for comparison.
+- When moving from the identity lengthscale \\(\mathbf{I}\\) to the PCA lengthscale \\(\color[RGB]{68,114,196}\boldsymbol{\Lambda}\\):
+    - FoRDEs exhibit small performance degradations on clean images of CIFAR-100;
+    - while becomes more robust against the natural corruptions of CIFAR-100-C.
