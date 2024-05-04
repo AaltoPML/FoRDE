@@ -21,7 +21,7 @@ Please cite our work if you find it useful:
 
 # Repulsive deep ensembles (RDEs) [1]
 
-> **Description:** Train an ensemble \\(\\{\boldsymbol{\theta}\_i\\}_{i=1}^M\\) using Wasserstein gradient descent, which employs a <span class="my_blue">kernelized repulsion term</span> to diversify the particles to cover the <span class="my_red"> Bayes posterior \\(p(\boldsymbol{\theta} \| \mathcal{D}) \\)</span>. 
+> **Description:** Train an ensemble \\(\\{\boldsymbol{\theta}\_i\\}_{i=1}^M\\) using Wasserstein gradient descent [2], which employs a <span class="my_blue">kernelized repulsion term</span> to diversify the particles to cover the <span class="my_red"> Bayes posterior \\(p(\boldsymbol{\theta} \| \mathcal{D}) \\)</span>. 
 
 \begin{equation}
 \boldsymbol{\theta}\_i^{(t+1)} = \boldsymbol{\theta}\_i^{(t)} + \eta\_t\bigg( 
@@ -45,4 +45,13 @@ Please cite our work if you find it useful:
 
 <strong class="my_orange">Problem:</strong> It is unclear how to define the repulsion term for neural networks:
 - Weight-space repulsion is ineffective due to overparameterization and weight symmetries.
-- Function-space repulsion oftens results in underfitting due to diversifying the outputs on training data.
+- Function-space repulsion often results in underfitting due to diversifying the outputs on training data.
+
+# First-order Repulsive deep ensembles (FoRDEs)
+
+<img src="./assets/forde_illustration.svg" alt="drawing" width="100%" max-width="1000px">
+
+<strong class="my_orange">Possible advantages:</strong>
+- Each member is guaranteed to represent a different function;
+- The issues of weight- and function-space repulsion are avoided;
+- Each member is encouraged to learn different features, which can improve robustness.
