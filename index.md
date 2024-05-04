@@ -98,8 +98,8 @@ For a 1D regression task (above) and a 2D classification task (below), FoRDEs ca
 
 <div class="my_box">
 <ol>
-<li>Input-gradient-space repulsion can perform better than weight- and function-space repulsion.
-<li>Better corruption robustness can be achieved by configuring the repulsion kernel using the eigen-decomposition of the training data.
+<li>Input-gradient-space repulsion can perform better than weight- and function-space repulsion.</li>
+<li>Better corruption robustness can be achieved by configuring the repulsion kernel using the eigen-decomposition of the training data.</li>
 </ol>
 </div>
 
