@@ -42,3 +42,7 @@ Please cite our work if you find it useful:
 
 - The <span class="my_red">driving force</span> directs the particles towards high density regions of the posterior
 - The <span class="my_blue">repulsion force</span> pushes the particles away from each other to enforce diversity.
+
+<strong class="my_orange">Problem:</strong> It is unclear how to define the repulsion term for neural networks:
+- Weight-space repulsion is ineffective due to overparameterization and weight symmetries.
+- Function-space repulsion oftens results in underfitting due to diversifying the outputs on training data.
