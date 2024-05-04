@@ -85,3 +85,26 @@ For a 1D regression task (above) and a 2D classification task (below), FoRDEs ca
 - When moving from the identity lengthscale \\(\mathbf{I}\\) to the PCA lengthscale \\(\color[RGB]{68,114,196}\boldsymbol{\Lambda}\\):
     - FoRDEs exhibit small performance degradations on clean images of CIFAR-100;
     - while becomes more robust against the natural corruptions of CIFAR-100-C.
+
+# Benchmark comparison
+
+<img src="./assets/cifar100.png" alt="drawing" width="100%" max-width="1000px">
+
+<img src="./assets/cifar10.png" alt="drawing" width="100%" max-width="1000px">
+
+<img src="./assets/tinyimagenet.png" alt="drawing" width="100%" max-width="1000px">
+
+# Main takeaways
+
+<div class="my_box">
+1. Input-gradient-space repulsion can perform better than weight- and function-space repulsion.
+2. Better corruption robustness can be achieved by configuring the repulsion kernel using the eigen-decomposition of the training data.
+</div>
+
+## References
+<p style="font-size: small;">
+[1] F. D’Angelo and V. Fortuin, “Repulsive deep ensembles are Bayesian,” Advances in Neural Information Processing Systems, vol. 34, pp. 3451–3465, 2021.
+</p>
+<p style="font-size: small;">
+[2] C. Liu, J. Zhuo, P. Cheng, R. Zhang, and J. Zhu, “Understanding and Accelerating Particle-Based Variational Inference,” in International Conference on Machine Learning, 2019.
+</p>
