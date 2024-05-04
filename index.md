@@ -39,3 +39,6 @@ Please cite our work if you find it useful:
       }
     \bigg)
 \end{equation}
+
+- The <span class="my_red">driving force</span> directs the particles towards high density regions of the posterior
+- The <span class="my_blue">repulsion force</span> pushes the particles away from each other to enforce diversity.
