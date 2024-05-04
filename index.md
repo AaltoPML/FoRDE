@@ -24,18 +24,8 @@ Please cite our work if you find it useful:
 > **Description:** Train an ensemble \\(\\{\boldsymbol{\theta}\_i\\}_{i=1}^M\\) using Wasserstein gradient descent, which employs a <span class="my_blue">kernelized repulsion term</span> to diversify the particles to cover the <span class="my_red"> Bayes posterior \\(p(\boldsymbol{\theta} \| \mathcal{D}) \\)</span>. 
 
 \begin{equation}
-\boldsymbol{\theta}_i^{(t+1)} = \boldsymbol{\theta}_i^{(t)} + \eta_t\bigg( 
-      {\color{red}
+{\color{red}
 \underbrace{
 \nabla_{\boldsymbol{\theta}_i^{(t)}} \log p(\boldsymbol{\theta}_i^{(t)} | \mathcal{D}) 
 }_{\text{Driving force}}}
-      -
-      {\color[RGB]{68,114,196}
-        \underbrace{\frac{
-          \sum_{j=1}^N \nabla_{\boldsymbol{\theta}_i^{(t)}} k(\boldsymbol{\theta}_i^{(t)}, \boldsymbol{\theta}_j^{(t)})
-        }{
-           \sum_{j=1}^N k(\boldsymbol{\theta}_i^{(t)}, \boldsymbol{\theta}_j^{(t)})
-        }}_{\text{Repulsion force}}
-      }
-    \bigg)
 \end{equation}
