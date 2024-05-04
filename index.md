@@ -46,3 +46,7 @@ Please cite our work if you find it useful:
 Given a base kernel <span class="my_deepred">\\(\kappa\\)</span>, we define the kernel in the input-gradient space for a minibatch of training samples \\(\mathcal{B}=\\{(\mathbf{x}\_b, y\_b\\}\_{b=1}^B\\) as follows:
 
 <img src="./assets/input_gradient_kernel.svg" alt="drawing" width="100%" max-width="1000px">
+
+We choose the <span class="my_orange">RBF kernel</span> on a <span class="my_purple">unit sphere</span> as the base kernel <span class="my_deepred">\\(\kappa\\)</span>:
+
+<img src="./assets/rbf_unit_sphere.svg" alt="drawing" width="100%" max-width="1000px">
