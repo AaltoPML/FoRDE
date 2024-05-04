@@ -1,6 +1,6 @@
 theme: jekyll-theme-cayman
 arxiv_url: https://openreview.net/forum?id=nLWiR5P3wr
-poster_url: https://github.com/AaltoPML/FoRDE/blob/main/poster.pdf
+poster_url: ".assets/poster.pdf"
 video_url: https://iclr.cc/virtual/2024/poster/17861
 title: Input-gradient space particle inference for neural network ensembles
 tagline: This website contains information regarding the paper Input-gradient space particle inference for neural network ensembles.
