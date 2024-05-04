@@ -57,7 +57,7 @@ Each <span class="my_blue">lengthscale</span> is inversely proportional to the s
 
 <img src="./assets/lengthscale_force.svg" alt="drawing" width="80%" max-width="800px">
 
-<div><strong class="my_orange">Proposition:</strong> One should apply <span class="my_blue">strong forces</span> in <span class="my_blue">high-variance dimensions (more in-between uncertainty)</span> and <span class="my_orange">weak forces</span> in <span class="my_orange">low-variance dimensions (less in-between uncertainty)</span>.
+<div class="my_box"><strong class="my_orange">Proposition:</strong> One should apply <span class="my_blue">strong forces</span> in <span class="my_blue">high-variance dimensions (more in-between uncertainty)</span> and <span class="my_orange">weak forces</span> in <span class="my_orange">low-variance dimensions (less in-between uncertainty)</span>.
 
 <img src="./assets/weak_strong_force.svg" alt="drawing" width="100%" max-width="1000px">
 
