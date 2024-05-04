@@ -23,22 +23,7 @@ Please cite our work if you find it useful:
 
 > **Description:** Train an ensemble \\(\\{\boldsymbol{\theta}\_i\\}_{i=1}^M\\) using Wasserstein gradient descent [2], which employs a <span class="my_blue">kernelized repulsion term</span> to diversify the particles to cover the <span class="my_red"> Bayes posterior \\(p(\boldsymbol{\theta} \| \mathcal{D}) \\)</span>. 
 
-\begin{equation}
-\boldsymbol{\theta}\_i^{(t+1)} = \boldsymbol{\theta}\_i^{(t)} + \eta\_t\bigg( 
-      {\color{red}
-\underbrace{
-\nabla\_{\boldsymbol{\theta}\_i^{(t)}} \log p(\boldsymbol{\theta}\_i^{(t)} \| \mathcal{D}) 
-}\_{\text{Driving force}}}
-      -
-      {\color[RGB]{68,114,196}
-        \underbrace{\frac{
-          \sum\_{j=1}^N \nabla\_{\boldsymbol{\theta}\_i^{(t)}} k(\boldsymbol{\theta}\_i^{(t)}, \boldsymbol{\theta}\_j^{(t)})
-        }{
-           \sum\_{j=1}^N k(\boldsymbol{\theta}\_i^{(t)}, \boldsymbol{\theta}\_j^{(t)})
-        }}\_{\text{Repulsion force}}
-      }
-    \bigg)
-\end{equation}
+<img src="./assets/rde_wgd.svg" alt="drawing" width="100%" max-width="1000px">
 
 - The <span class="my_red">driving force</span> directs the particles towards high density regions of the posterior
 - The <span class="my_blue">repulsion force</span> pushes the particles away from each other to enforce diversity.
@@ -55,3 +40,9 @@ Please cite our work if you find it useful:
 - Each member is guaranteed to represent a different function;
 - The issues of weight- and function-space repulsion are avoided;
 - Each member is encouraged to learn different features, which can improve robustness.
+
+# Defining the input-gradient kernel <span class="my_blue">\\(k\\)</span>
+
+Given a base kernel <span class="my_deepred">\\(\kappa\\)</span>, we define the kernel in the input-gradient space for a minibatch of training samples \\(\mathcal{B}=\\{(\mathbf{x}\_b, y\_b\\}\_{b=1}^B\\) as follows:
+
+<img src="./assets/input_gradient_kernel.svg" alt="drawing" width="100%" max-width="1000px">
