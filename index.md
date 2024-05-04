@@ -62,3 +62,9 @@ Each <span class="my_blue">lengthscale</span> is inversely proportional to the s
 <img src="./assets/weak_strong_force.svg" alt="drawing" width="100%" max-width="1000px">
 
 </div>
+- Use PCA to get the <span class="my_blue">eigenvalues</span> and <span class="my_red">eigenvectors</span> of the training data: \\(\\{{\color{red}\mathbf{u}\_d},{\color[RGB]{68,114,196}\lambda\_d}\\}\_{d=1}^D\\)
+- Define the base kernel:
+
+<img src="./assets/pca_kernel.svg" alt="drawing" width="80%" max-width="800px">
+
+    - 
