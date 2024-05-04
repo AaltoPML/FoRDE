@@ -23,7 +23,7 @@ Please cite our work if you find it useful:
 
 > **Description:** Train an ensemble \\(\\{\boldsymbol{\theta}\_i\\}_{i=1}^M\\) using Wasserstein gradient descent [2], which employs a <span class="my_blue">kernelized repulsion term</span> to diversify the particles to cover the <span class="my_red"> Bayes posterior \\(p(\boldsymbol{\theta} \| \mathcal{D}) \\)</span>. 
 
-<img src="./assets/rde_wgd.svg" alt="drawing" width="100%" max-width="1000px">
+<img src="./assets/rde_wgd.svg" alt="drawing" width="80%" max-width="800px">
 
 - The <span class="my_red">driving force</span> directs the particles towards high density regions of the posterior
 - The <span class="my_blue">repulsion force</span> pushes the particles away from each other to enforce diversity.
@@ -45,8 +45,9 @@ Please cite our work if you find it useful:
 
 Given a base kernel <span class="my_deepred">\\(\kappa\\)</span>, we define the kernel in the input-gradient space for a minibatch of training samples \\(\mathcal{B}=\\{(\mathbf{x}\_b, y\_b\\}\_{b=1}^B\\) as follows:
 
-<img src="./assets/input_gradient_kernel.svg" alt="drawing" width="100%" max-width="1000px">
+<img src="./assets/input_gradient_kernel.svg" alt="drawing" width="80%" max-width="800px">
 
 We choose the <span class="my_orange">RBF kernel</span> on a <span class="my_purple">unit sphere</span> as the base kernel <span class="my_deepred">\\(\kappa\\)</span>:
 
 <img src="./assets/rbf_unit_sphere.svg" alt="drawing" width="100%" max-width="1000px">
+
