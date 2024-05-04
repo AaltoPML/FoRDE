@@ -21,4 +21,4 @@ Please cite our work if you find it useful:
 
 # Repulsive deep ensembles (RDEs) [1]
 
-> **Description:** Train an ensemble \\(\\{\boldsymbol{\theta}\_i\\}_{i=1}^M\\) using Wasserstein gradient descent, which employs a <span class="my_blue">kernelized repulsion term</span> to diversify the particles to cover the Bayes posterior \\(p(\boldsymbol{\theta} \| \mathcal{D}) \\). 
+> **Description:** Train an ensemble \\(\\{\boldsymbol{\theta}\_i\\}_{i=1}^M\\) using Wasserstein gradient descent, which employs a <span class="my_blue">kernelized repulsion term</span> to diversify the particles to cover the <span class="my_red"> Bayes posterior \\(p(\boldsymbol{\theta} \| \mathcal{D}) \\)</span>. 
