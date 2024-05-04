@@ -57,7 +57,7 @@ Each <span class="my_blue">lengthscale</span> is inversely proportional to the s
 
 <img src="./assets/lengthscale_force.svg" alt="drawing" width="80%" max-width="800px">
 
-<div class="my_box"><strong class="my_orange">Proposition:</strong> One should apply <span class="my_blue">strong forces</span> in <span class="my_blue">high-variance dimensions (more in-between uncertainty)</span> and <span class="my_orange">weak forces</span> in <span class="my_orange">low-variance dimensions (less in-between uncertainty)</span>.
+<div style="margin:0 0 10px 0;"class="my_box"><strong class="my_orange">Proposition:</strong> One should apply <span class="my_blue">strong forces</span> in <span class="my_blue">high-variance dimensions (more in-between uncertainty)</span> and <span class="my_orange">weak forces</span> in <span class="my_orange">low-variance dimensions (less in-between uncertainty)</span>.
 
 <img src="./assets/weak_strong_force.svg" alt="drawing" width="100%" max-width="1000px">
 
@@ -66,5 +66,5 @@ Each <span class="my_blue">lengthscale</span> is inversely proportional to the s
 - Use PCA to get the <span class="my_blue">eigenvalues</span> and <span class="my_red">eigenvectors</span> of the training data: \\(\\{ {\color{red}\mathbf{u}\_d},{\color[RGB]{68,114,196}\lambda\_d}\\}\_{d=1}^D\\)
 - Define the base kernel:
 <img src="./assets/pca_kernel.svg" alt="drawing" width="80%" max-width="800px">
-    - \\( {\color{red}U} = \begin{bmatrix} {\color{red}\mathbf{u}\_1} & {\color{red}\mathbf{u}\_2} & \cdots & {\color{red}\mathbf{u}\_D} \end{bmatrix} \\) is a matrix containing the <span class="my_red">eigenvectors</span> as columns.
+    - \\( {\color{red}\mathbf{U}} = \begin{bmatrix} {\color{red}\mathbf{u}\_1} & {\color{red}\mathbf{u}\_2} & \cdots & {\color{red}\mathbf{u}\_D} \end{bmatrix} \\) is a matrix containing the <span class="my_red">eigenvectors</span> as columns.
     - \\( {\color[RGB]{68,114,196}\boldsymbol{\Sigma}^{-1}\_{\alpha}} = (1-\alpha)\mathbf{I} + \alpha {\color[RGB]{68,114,196}\boldsymbol{\Lambda} } \\) where \\( \color[RGB]{68,114,196}\boldsymbol{\Lambda} \\) is a diagonal matrix containing the <span class="my_blue">eigenvalues</span>
